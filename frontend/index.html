@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Curation Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h1>🎯 Deal Curator</h1>
+            <nav>
+                <a href="#" onclick="showPage('dashboard')" class="active" id="nav-dashboard">
+                    📊 Dashboard
+                </a>
+                <a href="#" onclick="showPage('scrapers')" id="nav-scrapers">
+                    🔍 Scrapers
+                </a>
+                <a href="#" onclick="showPage('deals')" id="nav-deals">
+                    💼 Deals
+                </a>
+                <a href="#" onclick="showPage('rate')" id="nav-rate">
+                    ⭐ Rate
+                </a>
+            </nav>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking connection...</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h2 id="pageTitle">Dashboard</h2>
+                <div class="user-info" id="userInfo">
+                    <span id="userName">Not logged in</span>
+                </div>
+            </div>
+
+            <!-- Login Page -->
+            <div id="loginPage" class="page">
+                <div class="login-box">
+                    <h1>🎯 Deal Curator</h1>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <p class="error" id="errorMsg"></p>
+                </div>
+            </div>
+
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="page" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Raw Deals</h3>
+                        <div class="value" id="totalDeals">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>New Deals</h3>
+                        <div class="value" id="newDeals">0</div>
+                    </div>
+                    <div class="stat-card good">
+                        <h3>Good Deals</h3>
+                        <div class="value" id="goodDeals">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Structured</h3>
+                        <div class="value" id="totalStructured">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Sources Status</h3>
+                    <table id="sourcesTable">
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Type</th>
+                                <th>Deals</th>
+                                <th>Last Scraped</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Scrapers Page -->
+            <div id="scrapersPage" class="page" style="display: none;">
+                <div class="card">
+                    <h3>Run Scrapers</h3>
+                    <table id="scrapersTable">
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Type</th>
+                                <th>Last Run</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="scrapeResult" class="card" style="display: none;">
+                    <h3>Result</h3>
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+
+            <!-- Deals Page -->
+            <div id="dealsPage" class="page" style="display: none;">
+                <div class="card">
+                    <h3>Search & Filter</h3>
+                    <div class="filters">
+                        <input type="text" id="searchInput" placeholder="Search deals..." onkeyup="loadDeals()">
+                        <select id="categoryFilter" onchange="loadDeals()">
+                            <option value="">All Categories</option>
+                            <option value="dining">Dining</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="travel">Travel</option>
+                            <option value="lifestyle">Lifestyle</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Deals (<span id="dealCount">0</span>)</h3>
+                    <table id="dealsTable">
+                        <thead>
+                            <tr>
+                                <th>Merchant</th>
+                                <th>Offer</th>
+                                <th>Discount</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Rate Page -->
+            <div id="ratePage" class="page" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card good">
+                        <h3>Good</h3>
+                        <div class="value" id="goodCount">0</div>
+                    </div>
+                    <div class="stat-card mediocre">
+                        <h3>Mediocre</h3>
+                        <div class="value" id="mediocreCount">0</div>
+                    </div>
+                    <div class="stat-card bad">
+                        <h3>Bad</h3>
+                        <div class="value" id="badCount">0</div>
+                    </div>
+                </div>
+                <div class="card" id="ratingCard">
+                    <div id="dealContent">
+                        <p class="loading">Loading deals...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
