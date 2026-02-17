@@ -15,7 +15,13 @@
 // const API_BASE = 'https://api.yourdomain.com/api';
 
 // SET YOUR BACKEND URL HERE:
-const API_BASE = 'http://YOUR_LINUX_IP:8000/api';
+// Local network access (same WiFi only):
+const API_BASE = 'http://192.168.100.19:8000/api';
+
+// For remote access from anywhere, use ngrok:
+// 1. Run: ngrok http 8000
+// 2. Replace URL below with your ngrok URL (e.g., https://abc123.ngrok.io/api)
+// const API_BASE = 'https://YOUR_NGROK_URL.ngrok.io/api';
 
 // Don't change below this line
 const CONFIG = {
