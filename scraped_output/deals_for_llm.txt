@@ -1,0 +1,186 @@
+================================================================================
+DEALS SCRAPED - READY FOR LLM PROCESSING
+================================================================================
+Date: 2026-02-17
+Instructions: Copy this entire text to ChatGPT/Claude and ask:
+"Convert these deals into structured JSON format with fields: merchant_name, 
+offer_title, description, discount_value, discount_type, category, valid_from, 
+valid_until, applicable_cards, source"
+================================================================================
+
+=== ALRAJHI BANK DEALS ===
+Source: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers
+
+DEAL 1:
+Merchant: BLACK TAP
+Offer: Get 20% OFF at Black Tap with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/Black-Tap
+
+DEAL 2:
+Merchant: AOK
+Offer: Get 20% OFF at AOK with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/AOK
+
+DEAL 3:
+Merchant: RUYA
+Offer: Get 20% OFF at RUYA with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.riyadbank.com/personal-banking/credit-cards/offers/Food-and-Beverage/RUYA
+
+DEAL 4:
+Merchant: SOBHY KABER RESTAURANTS
+Offer: Get 20% OFF at Sobhy Kaber with alrajhi bank cards! Valid during the holy month of Ramadan
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/SOBHY-KABER-restaurants
+
+DEAL 5:
+Merchant: ROKA RESTAURANTS
+Offer: Get 10% OFF at ROKA with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/ROKA-restaurants
+
+DEAL 6:
+Merchant: MR CHOW
+Offer: Get 20% OFF at MR Chow with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/CHOW
+
+DEAL 7:
+Merchant: ILBARETTO RESTAURANTS
+Offer: Get 20% OFF at IL BARETTO with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/ILBARETTO-restaurants-20
+
+DEAL 8:
+Merchant: JON & VINNYS
+Offer: Get 20% OFF at Jon & Vinnys with alrajhi bank cards!
+Valid Until: July 1, 2026
+Category: Food and Beverage
+URL: https://www.alrajhibank.com.sa/en/Personal/Offers/CardsOffers/Food-and-Beverage/Jon-Vinnys
+
+
+=== SAB BANK DEALS ===
+Source: https://www.sab.com/en/personal/compare-credit-cards/credit-card-special-offers/all-offers/
+
+DEAL 9:
+Merchant: Zagzoog for Home Appliances - KSA
+Offer: Additional 10% off at Zagzoog for Home Appliances
+Valid From: 15 February 2026
+Valid Until: 25 February 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards
+
+DEAL 10:
+Merchant: PANTHERA CLINICS - KSA
+Offer: Get up to 15% off at PANTHERA CLINICS
+Valid From: 10 February 2026
+Valid Until: 14 December 2026
+Category: Lifestyle
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 11:
+Merchant: PALA DE 7 - KSA
+Offer: Get 15% off at PALA DE 7
+Valid From: 10 February 2026
+Valid Until: 1 December 2026
+Category: Lifestyle
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 12:
+Merchant: NASHL Mona Al Mohaidib - KSA
+Offer: Get 15% off at NASHL Mona Al Mohaidib
+Valid From: 10 February 2026
+Valid Until: 10 October 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 13:
+Merchant: Dalal Boutique - KSA
+Offer: Get 30% off at Dalal Boutique
+Valid From: 10 February 2026
+Valid Until: 20 July 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 14:
+Merchant: GLAM MODA - KSA
+Offer: Get 10% off at GLAM MODA
+Valid From: 10 February 2026
+Valid Until: 31 December 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 15:
+Merchant: CROWN TOWN RESTAURANT - KSA
+Offer: Get 20% off at CROWN TOWN RESTAURANT
+Valid From: 10 February 2026
+Valid Until: 10 January 2027
+Category: Dining & Groceries
+Applicable Cards: SAB Credit Cards
+
+DEAL 16:
+Merchant: Alhadaya Center - KSA
+Offer: Get 10% off at Alhadaya Center
+Valid From: 15 February 2026
+Valid Until: 1 February 2027
+Category: Shopping
+Applicable Cards: SAB Credit Cards
+
+DEAL 17:
+Merchant: SACO - KSA
+Offer: Additional 20% off with no cap at SACO
+Valid From: 12 February 2026
+Valid Until: 18 February 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards
+
+DEAL 18:
+Merchant: HLANA GHER - KSA
+Offer: Get 20% off at HLANA GHER
+Valid From: 10 February 2026
+Valid Until: 1 November 2026
+Category: Dining & Groceries
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 19:
+Merchant: PLUSH NAIL BOUTIQUE - KSA
+Offer: Get 15% off at PLUSH NAIL BOUTIQUE
+Valid From: 10 February 2026
+Valid Until: 10 August 2026
+Category: Lifestyle
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+DEAL 20:
+Merchant: ALFOUZAN CENTER - KSA
+Offer: Get 10% off at ALFOUZAN CENTER
+Valid From: 10 February 2026
+Valid Until: 1 November 2026
+Category: Shopping
+Applicable Cards: SAB Credit Cards & Mada Cards
+
+
+=== RIYAD BANK ===
+Note: The Riyad Bank page redirected to corporate banking. The offers page might have changed.
+URL tested: https://www.riyadbank.com/personal-banking/credit-cards/offers
+No deals extracted from this source.
+
+================================================================================
+TOTAL DEALS FOUND: 20
+- Alrajhi Bank: 8 deals
+- SAB Bank: 12 deals
+- Riyad Bank: 0 deals (page issue)
+================================================================================
+
+SCREENSHOTS SAVED:
+- /home/anshad/deal-curation-platform/scraped_output/alrajhi_screenshot.png
+- /home/anshad/deal-curation-platform/scraped_output/riyad_screenshot.png
+- /home/anshad/deal-curation-platform/scraped_output/sab_screenshot.png

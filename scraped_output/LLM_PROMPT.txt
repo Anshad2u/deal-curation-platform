@@ -1,0 +1,41 @@
+================================================================================
+LLM PROMPT - COPY THIS TO CHATGPT/CLAUDE
+================================================================================
+
+I have scraped raw deal data from bank websites. Please convert this into a structured JSON format that I can import into my database.
+
+Here is the raw deal data:
+[ Paste the content from deals_for_llm.txt here ]
+
+Please convert each deal into this JSON format:
+{
+  "deals": [
+    {
+      "temp_id": 1,
+      "merchant_name": "Clean merchant name",
+      "offer_title": "Concise offer title",
+      "description": "Full offer description",
+      "discount_value": "20%",
+      "discount_type": "percentage",
+      "category": "dining|shopping|travel|lifestyle|entertainment|health|automotive|education|other",
+      "valid_from": "2026-02-10",
+      "valid_until": "2026-07-01",
+      "applicable_cards": "Alrajhi Bank Credit Cards",
+      "source": "Alrajhi Bank",
+      "source_url": "https://...",
+      "promo_code": null
+    }
+  ]
+}
+
+Rules:
+1. Parse dates into YYYY-MM-DD format
+2. discount_type should be: "percentage", "fixed_amount", "buy_x_get_y", or "other"
+3. Choose the most appropriate category from the list
+4. Clean up merchant names (remove "- KSA" suffixes)
+5. valid_from can be null if not specified
+6. promo_code should be null if not mentioned
+7. Return ONLY valid JSON, no markdown formatting
+8. Include all 20 deals in the array
+
+================================================================================
