@@ -16,7 +16,7 @@
 
 // SET YOUR BACKEND URL HERE:
 // Local network access (same WiFi only):
-const API_BASE = 'http://192.168.100.19:8000/api';
+const API_BASE = 'http://192.168.100.19:5000/api';
 
 // For remote access from anywhere, use ngrok:
 // 1. Run: ngrok http 8000
