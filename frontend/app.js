@@ -13,6 +13,7 @@ async function apiCall(endpoint, options = {}) {
     const url = CONFIG.API_BASE + endpoint;
     const headers = {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
         ...(token && { 'Authorization': `Bearer ${token}` })
     };
     
@@ -74,6 +75,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     try {
         const response = await fetch(CONFIG.API_BASE + '/auth/login', {
             method: 'POST',
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: formData
         });
         
@@ -254,7 +258,10 @@ function skipDeal() {
 // Check connection on load
 async function checkConnection() {
     try {
-        const response = await fetch(CONFIG.API_BASE.replace('/api', '/') + 'docs', { method: 'HEAD' });
+        const response = await fetch(CONFIG.API_BASE.replace('/api', '/') + 'docs', { 
+            method: 'HEAD',
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
         updateConnectionStatus(response.ok);
     } catch {
         updateConnectionStatus(false);
