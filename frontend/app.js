@@ -100,7 +100,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 });
 
 async function loadDashboard() {
-    const stats = await apiCall('/dashboard/stats');
+    const stats = await apiCall('/dashboard/stats/');
     if (stats) {
         document.getElementById('totalDeals').textContent = stats.total_deals;
         document.getElementById('newDeals').textContent = stats.new_deals;
@@ -109,7 +109,7 @@ async function loadDashboard() {
         updateConnectionStatus(true);
     }
     
-    const sources = await apiCall('/dashboard/sources-status');
+    const sources = await apiCall('/dashboard/sources-status/');
     if (sources) {
         const tbody = document.querySelector('#sourcesTable tbody');
         tbody.innerHTML = sources.map(s => `
@@ -124,7 +124,7 @@ async function loadDashboard() {
 }
 
 async function loadScrapers() {
-    const sources = await apiCall('/sources');
+    const sources = await apiCall('/sources/');
     if (sources) {
         const tbody = document.querySelector('#scrapersTable tbody');
         tbody.innerHTML = sources.map(s => `
@@ -145,7 +145,7 @@ async function runScraper(id, name) {
     resultDiv.style.display = 'block';
     contentDiv.innerHTML = '<p class="loading">Scraping ' + name + '...</p>';
     
-    const result = await apiCall(`/sources/${id}/scrape`, { method: 'POST', body: '{}' });
+    const result = await apiCall(`/sources/${id}/scrape/`, { method: 'POST', body: '{}' });
     
     if (result) {
         if (result.success) {
@@ -166,7 +166,7 @@ async function loadDeals() {
     const search = document.getElementById('searchInput')?.value || '';
     const category = document.getElementById('categoryFilter')?.value || '';
     
-    let url = `/deals?limit=100`;
+    let url = `/deals/?limit=100`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (category) url += `&category=${category}`;
     
@@ -186,7 +186,7 @@ async function loadDeals() {
 }
 
 async function loadRatingStats() {
-    const stats = await apiCall('/ratings/stats');
+    const stats = await apiCall('/ratings/stats/');
     if (stats) {
         document.getElementById('goodCount').textContent = stats.good;
         document.getElementById('mediocreCount').textContent = stats.mediocre;
@@ -195,7 +195,7 @@ async function loadRatingStats() {
 }
 
 async function loadDealsToRate() {
-    const data = await apiCall('/ratings/pending?limit=20');
+    const data = await apiCall('/ratings/pending/?limit=20');
     if (data && data.deals.length > 0) {
         currentDeals = data.deals;
         currentIndex = 0;
@@ -241,7 +241,7 @@ function showDeal() {
 
 async function rateDeal(dealId, quality) {
     const reason = document.getElementById('reasonInput')?.value || '';
-    const result = await apiCall(`/ratings/deals/${dealId}/rate?quality_score=${quality}&reason=${encodeURIComponent(reason)}`, { method: 'POST', body: '{}' });
+    const result = await apiCall(`/ratings/deals/${dealId}/rate/?quality_score=${quality}&reason=${encodeURIComponent(reason)}`, { method: 'POST', body: '{}' });
     
     if (result) {
         currentIndex++;
