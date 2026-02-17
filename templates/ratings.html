@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Deals{% endblock %}
+{% block page_title %}Rate Deals{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card good">
+        <h3>Good Deals</h3>
+        <div class="value" id="goodCount">0</div>
+    </div>
+    <div class="stat-card mediocre">
+        <h3>Mediocre Deals</h3>
+        <div class="value" id="mediocreCount">0</div>
+    </div>
+    <div class="stat-card bad">
+        <h3>Bad Deals</h3>
+        <div class="value" id="badCount">0</div>
+    </div>
+</div>
+
+<div class="card" id="ratingCard">
+    <div id="dealContent">
+        <div class="loading">Loading deals to rate...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentDeals = [];
+    let currentIndex = 0;
+
+    async function loadRatingStats() {
+        const stats = await apiGet('/ratings/stats');
+        if (stats) {
+            document.getElementById('goodCount').textContent = stats.good;
+            document.getElementById('mediocreCount').textContent = stats.mediocre;
+            document.getElementById('badCount').textContent = stats.bad;
+        }
+    }
+
+    async function loadDealsToRate() {
+        const data = await apiGet('/ratings/pending?limit=20');
+        if (data && data.deals.length > 0) {
+            currentDeals = data.deals;
+            currentIndex = 0;
+            showDeal();
+        } else {
+            document.getElementById('dealContent').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                    <h3>All deals rated! 🎉</h3>
+                    <p>No more deals to rate at this time.</p>
+                    <a href="/deals" class="btn btn-primary" style="margin-top: 15px;">View All Deals</a>
+                </div>
+            `;
+        }
+    }
+
+    function showDeal() {
+        if (currentIndex >= currentDeals.length) {
+            loadDealsToRate();
+            return;
+        }
+
+        const deal = currentDeals[currentIndex];
+        
+        document.getElementById('dealContent').innerHTML = `
+            <div style="margin-bottom: 20px;">
+                <span style="color: #7f8c8d; font-size: 14px;">Deal ${currentIndex + 1} of ${currentDeals.length}</span>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin-bottom: 15px; color: #2c3e50;">${deal.merchant_name}</h2>
+                <p style="font-size: 18px; margin-bottom: 15px;">${deal.offer_title}</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <strong style="color: #7f8c8d;">Discount:</strong><br>
+                        <span style="font-size: 16px; color: #27ae60;">${deal.discount_value || 'N/A'}</span>
+                    </div>
+                    <div>
+                        <strong style="color: #7f8c8d;">Category:</strong><br>
+                        <span class="badge badge-new">${deal.category || 'other'}</span>
+                    </div>
+                    <div>
+                        <strong style="color: #7f8c8d;">Valid Until:</strong><br>
+                        ${deal.valid_until ? new Date(deal.valid_until).toLocaleDateString() : 'N/A'}
+                    </div>
+                    <div>
+                        <strong style="color: #7f8c8d;">Applicable Cards:</strong><br>
+                        ${deal.applicable_cards || 'N/A'}
+                    </div>
+                </div>
+                
+                ${deal.description ? `<p style="color: #7f8c8d; margin-top: 15px;">${deal.description}</p>` : ''}
+            </div>
+            
+            <div class="form-group">
+                <label>Why this rating? (optional)</label>
+                <textarea id="reasonInput" rows="3" placeholder="e.g., Great discount, popular merchant, rare deal..."></textarea>
+            </div>
+            
+            <div class="rating-buttons">
+                <button class="rating-btn good" onclick="rateDeal(${deal.id}, 'good')">
+                    ⭐ Good
+                </button>
+                <button class="rating-btn mediocre" onclick="rateDeal(${deal.id}, 'mediocre')">
+                    ⭐⭐ Mediocre
+                </button>
+                <button class="rating-btn bad" onclick="rateDeal(${deal.id}, 'bad')">
+                    ⭐⭐⭐ Bad
+                </button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="skipDeal()">Skip</button>
+            </div>
+        `;
+    }
+
+    async function rateDeal(dealId, qualityScore) {
+        const reason = document.getElementById('reasonInput').value;
+        
+        const result = await apiPost(`/ratings/deals/${dealId}/rate?quality_score=${qualityScore}&reason=${encodeURIComponent(reason)}`, {});
+        
+        if (result && result.success) {
+            currentIndex++;
+            loadRatingStats();
+            showDeal();
+        }
+    }
+
+    function skipDeal() {
+        currentIndex++;
+        showDeal();
+    }
+
+    loadRatingStats();
+    loadDealsToRate();
+</script>
+{% endblock %}

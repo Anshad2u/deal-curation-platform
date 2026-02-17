@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Raw Deals Queue{% endblock %}
+{% block page_title %}Raw Deals Queue{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>Filters</h3>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label>Status</label>
+            <select id="statusFilter" onchange="loadDeals()">
+                <option value="">All</option>
+                <option value="new" selected>New</option>
+                <option value="processing">Processing</option>
+                <option value="processed">Processed</option>
+                <option value="duplicate">Duplicate</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label>Source</label>
+            <select id="sourceFilter" onchange="loadDeals()">
+                <option value="">All Sources</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin: 0;">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" onclick="exportSelected()">📤 Export Selected</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Raw Deals (<span id="dealCount">0</span>)</h3>
+    <div class="checkbox-group" style="margin-bottom: 15px;">
+        <label>
+            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+            <strong>Select All</strong>
+        </label>
+    </div>
+    <table id="dealsTable">
+        <thead>
+            <tr>
+                <th width="30"><input type="checkbox" id="selectAllHead" onchange="toggleSelectAll()"></th>
+                <th>Title</th>
+                <th>Merchant</th>
+                <th>Discount</th>
+                <th>Source</th>
+                <th>Scraped At</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="8" class="loading">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedDeals = new Set();
+
+    async function loadDeals() {
+        const status = document.getElementById('statusFilter').value;
+        const sourceId = document.getElementById('sourceFilter').value;
+        
+        let url = `/raw-deals?limit=200`;
+        if (status) url += `&status=${status}`;
+        if (sourceId) url += `&source_id=${sourceId}`;
+        
+        const data = await apiGet(url);
+        if (data) {
+            document.getElementById('dealCount').textContent = data.total;
+            const tbody = document.querySelector('#dealsTable tbody');
+            
+            if (data.deals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">No deals found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.deals.map(d => `
+                <tr>
+                    <td><input type="checkbox" value="${d.id}" onchange="toggleDeal(${d.id})" ${selectedDeals.has(d.id) ? 'checked' : ''}></td>
+                    <td>${d.raw_title || 'N/A'}</td>
+                    <td>${d.raw_merchant || 'N/A'}</td>
+                    <td>${d.raw_discount || 'N/A'}</td>
+                    <td>${d.source_name || 'N/A'}</td>
+                    <td>${new Date(d.scraped_at).toLocaleString()}</td>
+                    <td><span class="badge badge-${d.status}">${d.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewDetails(${d.id})">View</button>
+                        ${d.status === 'new' ? `<button class="btn btn-danger" onclick="markDuplicate(${d.id})">Mark Duplicate</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    async function loadSources() {
+        const sources = await apiGet('/sources');
+        if (sources) {
+            const select = document.getElementById('sourceFilter');
+            sources.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name;
+                select.appendChild(option);
+            });
+        }
+    }
+
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll('#dealsTable input[type="checkbox"]');
+        const selectAll = document.getElementById('selectAllHead').checked;
+        
+        checkboxes.forEach(cb => {
+            cb.checked = selectAll;
+            const dealId = parseInt(cb.value);
+            if (selectAll) {
+                selectedDeals.add(dealId);
+            } else {
+                selectedDeals.delete(dealId);
+            }
+        });
+    }
+
+    function toggleDeal(dealId) {
+        if (selectedDeals.has(dealId)) {
+            selectedDeals.delete(dealId);
+        } else {
+            selectedDeals.add(dealId);
+        }
+    }
+
+    async function exportSelected() {
+        if (selectedDeals.size === 0) {
+            showAlert('Please select at least one deal', 'error');
+            return;
+        }
+
+        const result = await apiPost('/raw-deals/export', { deal_ids: Array.from(selectedDeals) });
+        
+        if (result) {
+            const jsonStr = JSON.stringify(result, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `deals-export-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert('Exported ' + result.deals.length + ' deals', 'success');
+            loadDeals();
+        }
+    }
+
+    async function markDuplicate(dealId) {
+        const result = await apiPost(`/raw-deals/${dealId}/duplicate`, {});
+        if (result && result.success) {
+            showAlert('Deal marked as duplicate', 'success');
+            loadDeals();
+        }
+    }
+
+    function viewDetails(dealId) {
+        alert('View details for deal ' + dealId + ' - Feature coming soon!');
+    }
+
+    loadSources();
+    loadDeals();
+</script>
+{% endblock %}

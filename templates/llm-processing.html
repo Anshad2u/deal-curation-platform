@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}LLM Processing{% endblock %}
+{% block page_title %}LLM Processing Workflow{% endblock %}
+
+{% block content %}
+<div class="two-column">
+    <div class="card">
+        <h3>Step 1: Export Deals</h3>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">Select raw deals to process with LLM</p>
+        
+        <div class="form-group">
+            <label>Select deals with status:</label>
+            <select id="statusSelect">
+                <option value="new">New Deals</option>
+                <option value="processing">Processing</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Batch name (optional):</label>
+            <input type="text" id="batchName" placeholder="e.g., Batch 2024-02-17">
+        </div>
+        
+        <div id="dealPreview" style="max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+        </div>
+        
+        <button class="btn btn-primary" onclick="exportBatch()">📤 Export for LLM</button>
+    </div>
+
+    <div class="card">
+        <h3>Step 2: Import Structured Data</h3>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">Paste the JSON output from LLM</p>
+        
+        <div class="form-group">
+            <label>Batch ID:</label>
+            <input type="number" id="batchId" placeholder="Enter batch ID from step 1">
+        </div>
+        
+        <div class="form-group">
+            <label>Paste structured JSON:</label>
+            <textarea id="jsonInput" rows="10" placeholder='[{"temp_id": 1, "merchant_name": "...", ...}]'></textarea>
+        </div>
+        
+        <button class="btn btn-success" onclick="importBatch()">📥 Import Structured Deals</button>
+    </div>
+</div>
+
+<div class="card">
+    <h3>LLM Prompt Template</h3>
+    <p style="color: #7f8c8d; margin-bottom: 15px;">Copy this prompt along with your exported JSON</p>
+    <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;">You are a data extraction specialist. Convert the following unstructured deal data into a structured JSON format.
+
+INPUT FORMAT:
+An array of deals with these fields:
+- temp_id: Unique identifier for this deal
+- raw_title: Title text
+- raw_description: Description text
+- raw_merchant: Merchant name
+- raw_validity: Validity period text
+- source: Source name
+
+OUTPUT FORMAT:
+Return a JSON array with the same number of deals, each containing:
+{
+  "temp_id": &lt;same as input&gt;,
+  "merchant_name": "Clean merchant name",
+  "offer_title": "Clean offer title",
+  "description": "Full description",
+  "discount_value": "e.g., 20% or SAR 50",
+  "discount_type": "percentage|fixed_amount|buy_x_get_y|other",
+  "category": "dining|shopping|travel|lifestyle|entertainment|health|automotive|education|other",
+  "valid_from": "YYYY-MM-DD or null",
+  "valid_until": "YYYY-MM-DD or null",
+  "location": "Location if specified, or null",
+  "applicable_cards": "e.g., All Credit Cards, Mada Cards",
+  "terms_conditions": "Terms text or null",
+  "promo_code": "Promo code if mentioned, or null"
+}
+
+RULES:
+1. Parse dates from text (e.g., "Valid until December 31, 2026" → "2026-12-31")
+2. Extract discount value and type from description
+3. Choose the most appropriate category
+4. Keep null for fields not found in the text
+5. Return ONLY valid JSON, no markdown</textarea>
+</div>
+
+<div class="card">
+    <h3>Recent Batches</h3>
+    <table id="batchesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Deals</th>
+                <th>Exported</th>
+                <th>Imported</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="6" class="loading">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadDeals() {
+        const status = document.getElementById('statusSelect').value;
+        const data = await apiGet(`/raw-deals?status=${status}&limit=50`);
+        
+        if (data && data.deals.length > 0) {
+            const preview = document.getElementById('dealPreview');
+            preview.innerHTML = `
+                <p><strong>${data.total} deals found</strong></p>
+                <div style="margin-top: 10px;">
+                    ${data.deals.slice(0, 10).map(d => `
+                        <div style="padding: 8px; border-bottom: 1px solid #eee;">
+                            <strong>${d.raw_title || 'No title'}</strong><br>
+                            <small style="color: #7f8c8d;">${d.raw_merchant || 'Unknown merchant'}</small>
+                        </div>
+                    `).join('')}
+                    ${data.total > 10 ? `<p style="margin-top: 10px; color: #7f8c8d;">...and ${data.total - 10} more</p>` : ''}
+                </div>
+            `;
+        }
+    }
+
+    async function exportBatch() {
+        const status = document.getElementById('statusSelect').value;
+        const batchName = document.getElementById('batchName').value;
+        
+        const dealsData = await apiGet(`/raw-deals?status=${status}&limit=100`);
+        
+        if (!dealsData || dealsData.deals.length === 0) {
+            showAlert('No deals to export', 'error');
+            return;
+        }
+
+        const dealIds = dealsData.deals.map(d => d.id);
+        const result = await apiPost('/llm/batches', { raw_deal_ids: dealIds, name: batchName || null });
+        
+        if (result) {
+            const exportData = await apiGet(`/llm/batches/${result.batch_id}`);
+            
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `batch-${result.batch_id}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert(`Batch ${result.batch_id} created with ${result.deals_count} deals`, 'success');
+            document.getElementById('batchId').value = result.batch_id;
+            loadBatches();
+            loadDeals();
+        }
+    }
+
+    async function importBatch() {
+        const batchId = parseInt(document.getElementById('batchId').value);
+        const jsonText = document.getElementById('jsonInput').value;
+        
+        if (!batchId) {
+            showAlert('Please enter a batch ID', 'error');
+            return;
+        }
+        
+        if (!jsonText.trim()) {
+            showAlert('Please paste structured JSON', 'error');
+            return;
+        }
+
+        try {
+            const deals = JSON.parse(jsonText);
+            
+            if (!Array.isArray(deals)) {
+                throw new Error('JSON must be an array');
+            }
+
+            const result = await apiPost(`/llm/batches/${batchId}/import`, { deals: deals });
+            
+            if (result && result.success) {
+                showAlert(`Successfully imported ${result.imported_count} deals`, 'success');
+                document.getElementById('jsonInput').value = '';
+                document.getElementById('batchId').value = '';
+                loadBatches();
+            }
+        } catch (error) {
+            showAlert('Invalid JSON: ' + error.message, 'error');
+        }
+    }
+
+    async function loadBatches() {
+        const batches = await apiGet('/llm/batches');
+        if (batches) {
+            const tbody = document.querySelector('#batchesTable tbody');
+            
+            if (batches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">No batches yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = batches.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.name}</td>
+                    <td><span class="badge badge-${b.status === 'completed' ? 'processed' : 'processing'}">${b.status}</span></td>
+                    <td>${b.deals_count}</td>
+                    <td>${new Date(b.exported_at).toLocaleString()}</td>
+                    <td>${b.imported_at ? new Date(b.imported_at).toLocaleString() : '-'}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    loadDeals();
+    loadBatches();
+</script>
+{% endblock %}

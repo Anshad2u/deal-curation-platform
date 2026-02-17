@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Deal Database{% endblock %}
+{% block page_title %}Structured Deals Database{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>Search & Filter</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 2; margin: 0;">
+            <label>Search</label>
+            <input type="text" id="searchInput" placeholder="Search by merchant or title..." onkeyup="loadDeals()">
+        </div>
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <label>Category</label>
+            <select id="categoryFilter" onchange="loadDeals()">
+                <option value="">All Categories</option>
+                <option value="dining">Dining</option>
+                <option value="shopping">Shopping</option>
+                <option value="travel">Travel</option>
+                <option value="lifestyle">Lifestyle</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="health">Health</option>
+                <option value="automotive">Automotive</option>
+                <option value="education">Education</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin: 0;">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" onclick="exportDeals()">📤 Export</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Deals (<span id="dealCount">0</span>)</h3>
+    <table id="dealsTable">
+        <thead>
+            <tr>
+                <th>Merchant</th>
+                <th>Offer Title</th>
+                <th>Discount</th>
+                <th>Category</th>
+                <th>Valid Until</th>
+                <th>Rated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="7" class="loading">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadDeals() {
+        const search = document.getElementById('searchInput').value;
+        const category = document.getElementById('categoryFilter').value;
+        
+        let url = `/deals?limit=100`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (category) url += `&category=${category}`;
+        
+        const data = await apiGet(url);
+        if (data) {
+            document.getElementById('dealCount').textContent = data.total;
+            const tbody = document.querySelector('#dealsTable tbody');
+            
+            if (data.deals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">No deals found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.deals.map(d => `
+                <tr>
+                    <td><strong>${d.merchant_name}</strong></td>
+                    <td>${d.offer_title}</td>
+                    <td>${d.discount_value || 'N/A'}</td>
+                    <td><span class="badge badge-new">${d.category || 'other'}</span></td>
+                    <td>${d.valid_until ? new Date(d.valid_until).toLocaleDateString() : 'N/A'}</td>
+                    <td>${d.has_rating ? '⭐' : '-'}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewDeal(${d.id})">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    async function exportDeals() {
+        const category = document.getElementById('categoryFilter').value;
+        
+        let url = `/deals/export`;
+        if (category) url += `?category=${category}`;
+        
+        const data = await apiGet(url);
+        
+        if (data) {
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `structured-deals-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert(`Exported ${data.total} deals`, 'success');
+        }
+    }
+
+    function viewDeal(dealId) {
+        alert('View deal ' + dealId + ' - Feature coming soon!');
+    }
+
+    loadDeals();
+</script>
+{% endblock %}

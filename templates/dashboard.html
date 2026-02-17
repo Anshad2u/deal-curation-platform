@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Deal Curation Platform{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Raw Deals</h3>
+        <div class="value" id="totalDeals">0</div>
+    </div>
+    <div class="stat-card">
+        <h3>New Deals (Unprocessed)</h3>
+        <div class="value" id="newDeals">0</div>
+    </div>
+    <div class="stat-card good">
+        <h3>Good Quality Deals</h3>
+        <div class="value" id="goodDeals">0</div>
+    </div>
+    <div class="stat-card">
+        <h3>Structured Deals</h3>
+        <div class="value" id="totalStructured">0</div>
+    </div>
+    <div class="stat-card">
+        <h3>Rated Deals</h3>
+        <div class="value" id="totalRated">0</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Sources Status</h3>
+    <table id="sourcesTable">
+        <thead>
+            <tr>
+                <th>Source Name</th>
+                <th>Type</th>
+                <th>Total Deals</th>
+                <th>Last Scraped</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="5" class="loading">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3>Quick Actions</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="/scrapers" class="btn btn-primary">🔍 Run Scrapers</a>
+        <a href="/raw-deals" class="btn btn-success">📥 View Raw Deals</a>
+        <a href="/llm-processing" class="btn btn-warning">🤖 Process with LLM</a>
+        <a href="/rate" class="btn btn-secondary">⭐ Rate Deals</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadDashboardData() {
+        const stats = await apiGet('/dashboard/stats');
+        if (stats) {
+            document.getElementById('totalDeals').textContent = stats.total_deals;
+            document.getElementById('newDeals').textContent = stats.new_deals;
+            document.getElementById('goodDeals').textContent = stats.good_deals;
+            document.getElementById('totalStructured').textContent = stats.total_structured;
+            document.getElementById('totalRated').textContent = stats.total_rated;
+        }
+
+        const sources = await apiGet('/dashboard/sources-status');
+        if (sources) {
+            const tbody = document.querySelector('#sourcesTable tbody');
+            tbody.innerHTML = sources.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.type}</td>
+                    <td>${s.deal_count}</td>
+                    <td>${s.last_scraped ? new Date(s.last_scraped).toLocaleString() : 'Never'}</td>
+                    <td><span class="badge ${s.is_active ? 'badge-new' : 'badge-duplicate'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    loadDashboardData();
+    setInterval(loadDashboardData, 60000);
+</script>
+{% endblock %}

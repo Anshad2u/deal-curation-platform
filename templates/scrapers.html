@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Scrapers Management{% endblock %}
+{% block page_title %}Scrapers Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>Available Scrapers</h3>
+    <table id="sourcesTable">
+        <thead>
+            <tr>
+                <th>Source Name</th>
+                <th>Type</th>
+                <th>URL</th>
+                <th>Last Scraped</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="6" class="loading">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="scrapeResult" class="card" style="display: none;">
+    <h3>Scrape Result</h3>
+    <div id="resultContent"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadSources() {
+        const sources = await apiGet('/sources');
+        if (sources) {
+            const tbody = document.querySelector('#sourcesTable tbody');
+            tbody.innerHTML = sources.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.type}</td>
+                    <td><a href="${s.url}" target="_blank">${s.url.substring(0, 50)}...</a></td>
+                    <td>${s.last_scraped ? new Date(s.last_scraped).toLocaleString() : 'Never'}</td>
+                    <td><span class="badge ${s.is_active ? 'badge-new' : 'badge-duplicate'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
+                    <td>
+                        <button class="btn btn-primary" onclick="runScrape(${s.id}, '${s.name}')">🔍 Scrape</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    async function runScrape(sourceId, sourceName) {
+        const resultDiv = document.getElementById('scrapeResult');
+        const contentDiv = document.getElementById('resultContent');
+        
+        resultDiv.style.display = 'block';
+        contentDiv.innerHTML = '<div class="loading">Scraping ' + sourceName + '... Please wait...</div>';
+        
+        const result = await apiPost(`/sources/${sourceId}/scrape`, {});
+        
+        if (result) {
+            if (result.success) {
+                contentDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Success!</strong><br>
+                        Total found: ${result.total_found}<br>
+                        New deals: ${result.new_deals}<br>
+                        Duplicates: ${result.duplicates}
+                    </div>
+                `;
+                loadSources();
+            } else {
+                contentDiv.innerHTML = `<div class="alert alert-error">Error: ${result.error}</div>`;
+            }
+        }
+    }
+
+    loadSources();
+</script>
+{% endblock %}

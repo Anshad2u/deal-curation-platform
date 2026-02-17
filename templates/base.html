@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Deal Curation Platform{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h1>🎯 Deal Curator</h1>
+            <nav>
+                <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">
+                    📊 Dashboard
+                </a>
+                <a href="/scrapers" class="{% if request.url.path == '/scrapers' %}active{% endif %}">
+                    🔍 Scrapers
+                </a>
+                <a href="/raw-deals" class="{% if request.url.path == '/raw-deals' %}active{% endif %}">
+                    📥 Raw Deals
+                </a>
+                <a href="/llm-processing" class="{% if request.url.path == '/llm-processing' %}active{% endif %}">
+                    🤖 LLM Processing
+                </a>
+                <a href="/deals" class="{% if request.url.path == '/deals' %}active{% endif %}">
+                    💼 Deal Database
+                </a>
+                <a href="/rate" class="{% if request.url.path == '/rate' %}active{% endif %}">
+                    ⭐ Rate Deals
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h2>{% block page_title %}{% endblock %}</h2>
+                <div class="user-info">
+                    Welcome, {{ user.username }} | <a href="#" onclick="logout()">Logout</a>
+                </div>
+            </div>
+
+            <div id="alerts"></div>
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        function showAlert(message, type = 'info') {
+            const alertsDiv = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertsDiv.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        async function apiGet(endpoint) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(API_BASE + endpoint, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return null;
+            }
+            return await response.json();
+        }
+
+        async function apiPost(endpoint, data) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(API_BASE + endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return null;
+            }
+            return await response.json();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
