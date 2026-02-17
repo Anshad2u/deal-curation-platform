@@ -3,178 +3,455 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deal Curation Platform</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Deal Curation - Data View</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        h1 { margin-bottom: 20px; color: #2c3e50; }
+        h2 { margin: 20px 0 10px; color: #34495e; font-size: 18px; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .filters {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filters label { font-weight: 500; }
+        .filters select, .filters input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .stats {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            gap: 30px;
+        }
+        .stat { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #3498db; }
+        .stat-label { font-size: 12px; color: #7f8c8d; }
+        
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 5px;
+            overflow: hidden;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        .badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .badge-good { background: #27ae60; color: white; }
+        .badge-mediocre { background: #f39c12; color: white; }
+        .badge-bad { background: #e74c3c; color: white; }
+        .badge-dining { background: #e743c3; color: white; }
+        .badge-shopping { background: #9b59b6; color: white; }
+        .badge-lifestyle { background: #1abc9c; color: white; }
+        .badge-travel { background: #3498db; color: white; }
+        .badge-other { background: #95a5a6; color: white; }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+        }
+        .login-box h2 { margin-bottom: 20px; text-align: center; }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .error { color: #e74c3c; text-align: center; margin-top: 10px; }
+        
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 40px; color: #7f8c8d; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <h1>🎯 Deal Curator</h1>
-            <nav>
-                <a href="#" onclick="showPage('dashboard')" class="active" id="nav-dashboard">
-                    📊 Dashboard
-                </a>
-                <a href="#" onclick="showPage('scrapers')" id="nav-scrapers">
-                    🔍 Scrapers
-                </a>
-                <a href="#" onclick="showPage('deals')" id="nav-deals">
-                    💼 Deals
-                </a>
-                <a href="#" onclick="showPage('rate')" id="nav-rate">
-                    ⭐ Rate
-                </a>
-            </nav>
-            <div class="connection-status" id="connectionStatus">
-                <span class="status-dot"></span>
-                <span class="status-text">Checking connection...</span>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <div class="header">
-                <h2 id="pageTitle">Dashboard</h2>
-                <div class="user-info" id="userInfo">
-                    <span id="userName">Not logged in</span>
-                </div>
-            </div>
-
-            <!-- Login Page -->
-            <div id="loginPage" class="page">
-                <div class="login-box">
-                    <h1>🎯 Deal Curator</h1>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </form>
-                    <p class="error" id="errorMsg"></p>
-                </div>
-            </div>
-
-            <!-- Dashboard Page -->
-            <div id="dashboardPage" class="page" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Raw Deals</h3>
-                        <div class="value" id="totalDeals">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>New Deals</h3>
-                        <div class="value" id="newDeals">0</div>
-                    </div>
-                    <div class="stat-card good">
-                        <h3>Good Deals</h3>
-                        <div class="value" id="goodDeals">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Structured</h3>
-                        <div class="value" id="totalStructured">0</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Sources Status</h3>
-                    <table id="sourcesTable">
-                        <thead>
-                            <tr>
-                                <th>Source</th>
-                                <th>Type</th>
-                                <th>Deals</th>
-                                <th>Last Scraped</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Scrapers Page -->
-            <div id="scrapersPage" class="page" style="display: none;">
-                <div class="card">
-                    <h3>Run Scrapers</h3>
-                    <table id="scrapersTable">
-                        <thead>
-                            <tr>
-                                <th>Source</th>
-                                <th>Type</th>
-                                <th>Last Run</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div id="scrapeResult" class="card" style="display: none;">
-                    <h3>Result</h3>
-                    <div id="resultContent"></div>
-                </div>
-            </div>
-
-            <!-- Deals Page -->
-            <div id="dealsPage" class="page" style="display: none;">
-                <div class="card">
-                    <h3>Search & Filter</h3>
-                    <div class="filters">
-                        <input type="text" id="searchInput" placeholder="Search deals..." onkeyup="loadDeals()">
-                        <select id="categoryFilter" onchange="loadDeals()">
-                            <option value="">All Categories</option>
-                            <option value="dining">Dining</option>
-                            <option value="shopping">Shopping</option>
-                            <option value="travel">Travel</option>
-                            <option value="lifestyle">Lifestyle</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Deals (<span id="dealCount">0</span>)</h3>
-                    <table id="dealsTable">
-                        <thead>
-                            <tr>
-                                <th>Merchant</th>
-                                <th>Offer</th>
-                                <th>Discount</th>
-                                <th>Category</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Rate Page -->
-            <div id="ratePage" class="page" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-card good">
-                        <h3>Good</h3>
-                        <div class="value" id="goodCount">0</div>
-                    </div>
-                    <div class="stat-card mediocre">
-                        <h3>Mediocre</h3>
-                        <div class="value" id="mediocreCount">0</div>
-                    </div>
-                    <div class="stat-card bad">
-                        <h3>Bad</h3>
-                        <div class="value" id="badCount">0</div>
-                    </div>
-                </div>
-                <div class="card" id="ratingCard">
-                    <div id="dealContent">
-                        <p class="loading">Loading deals...</p>
-                    </div>
-                </div>
-            </div>
-        </main>
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2>🔐 Login</h2>
+            <input type="text" id="username" placeholder="Username" value="admin">
+            <input type="password" id="password" placeholder="Password" value="admin123">
+            <button onclick="login()">Login</button>
+            <p class="error hidden" id="loginError"></p>
+        </div>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <h1>🎯 Deal Curation Platform</h1>
+    
+    <div class="stats" id="stats">
+        <div class="stat">
+            <div class="stat-value" id="totalDeals">0</div>
+            <div class="stat-label">Total Deals</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="goodDeals" style="color:#27ae60">0</div>
+            <div class="stat-label">Good Quality</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="mediocreDeals" style="color:#f39c12">0</div>
+            <div class="stat-label">Mediocre</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="badDeals" style="color:#e74c3c">0</div>
+            <div class="stat-label">Bad</div>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('structured')">Structured Deals (Scored)</div>
+        <div class="tab" onclick="showTab('raw')">Raw Deals (Unprocessed)</div>
+    </div>
+    
+    <div class="filters">
+        <label>Quality:</label>
+        <select id="qualityFilter" onchange="loadData()">
+            <option value="">All</option>
+            <option value="good" selected>Good Only</option>
+            <option value="mediocre">Mediocre</option>
+            <option value="bad">Bad</option>
+        </select>
+        
+        <label>Category:</label>
+        <select id="categoryFilter" onchange="loadData()">
+            <option value="">All Categories</option>
+            <option value="dining">Dining</option>
+            <option value="shopping">Shopping</option>
+            <option value="lifestyle">Lifestyle</option>
+            <option value="travel">Travel</option>
+            <option value="other">Other</option>
+        </select>
+        
+        <label>Search:</label>
+        <input type="text" id="searchFilter" placeholder="Search..." onkeyup="loadData()">
+        
+        <button onclick="exportData()" style="padding:8px 15px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;">📥 Export JSON</button>
+        <button onclick="loadData()" style="padding:8px 15px;background:#3498db;color:white;border:none;border-radius:4px;cursor:pointer;">🔄 Refresh</button>
+    </div>
+    
+    <div id="structuredTab">
+        <h2>Structured Deals (All Columns)</h2>
+        <div class="table-container">
+            <table id="structuredTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Merchant</th>
+                        <th>Offer Title</th>
+                        <th>Description</th>
+                        <th>Discount</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Valid Until</th>
+                        <th>Cards</th>
+                        <th>Score</th>
+                        <th>Quality</th>
+                        <th>Reason</th>
+                        <th>Source URL</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody id="structuredBody">
+                    <tr><td colspan="14" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="rawTab" class="hidden">
+        <h2>Raw Deals (Unprocessed)</h2>
+        <div class="table-container">
+            <table id="rawTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Source</th>
+                        <th>Raw Title</th>
+                        <th>Raw Merchant</th>
+                        <th>Raw Discount</th>
+                        <th>Raw Validity</th>
+                        <th>Raw Description</th>
+                        <th>Status</th>
+                        <th>URL</th>
+                        <th>Scraped At</th>
+                    </tr>
+                </thead>
+                <tbody id="rawBody">
+                    <tr><td colspan="10" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script src="config.js"></script>
-    <script src="app.js"></script>
+    <script>
+        let token = localStorage.getItem('deal_curator_token');
+        let allDeals = [];
+        let allRatings = {};
+        let currentTab = 'structured';
+        
+        async function api(endpoint, options = {}) {
+            const headers = {
+                'ngrok-skip-browser-warning': 'true',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            };
+            try {
+                const res = await fetch(CONFIG.API_BASE + endpoint, { ...options, headers });
+                if (res.status === 401) {
+                    document.getElementById('loginOverlay').classList.remove('hidden');
+                    return null;
+                }
+                return await res.json();
+            } catch (e) {
+                console.error('API Error:', e);
+                return null;
+            }
+        }
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            
+            const res = await fetch(CONFIG.API_BASE + '/auth/login', {
+                method: 'POST',
+                headers: { 'ngrok-skip-browser-warning': 'true' },
+                body: formData
+            });
+            
+            const data = await res.json();
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem('deal_curator_token', token);
+                document.getElementById('loginOverlay').classList.add('hidden');
+                loadData();
+                loadStats();
+            } else {
+                document.getElementById('loginError').textContent = data.detail || 'Login failed';
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+        
+        function showTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${tab === 'structured' ? 1 : 2})`).classList.add('active');
+            document.getElementById('structuredTab').classList.toggle('hidden', tab !== 'structured');
+            document.getElementById('rawTab').classList.toggle('hidden', tab !== 'raw');
+            loadData();
+        }
+        
+        async function loadStats() {
+            const stats = await api('/dashboard/stats');
+            if (stats) {
+                document.getElementById('totalDeals').textContent = stats.total_structured;
+                document.getElementById('goodDeals').textContent = stats.good_deals;
+            }
+            
+            const ratings = await api('/ratings/stats');
+            if (ratings) {
+                document.getElementById('mediocreDeals').textContent = ratings.mediocre;
+                document.getElementById('badDeals').textContent = ratings.bad;
+                document.getElementById('goodDeals').textContent = ratings.good;
+            }
+        }
+        
+        async function loadData() {
+            if (currentTab === 'structured') {
+                await loadStructuredDeals();
+            } else {
+                await loadRawDeals();
+            }
+        }
+        
+        async function loadStructuredDeals() {
+            const quality = document.getElementById('qualityFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const search = document.getElementById('searchFilter').value;
+            
+            let url = `/deals/?limit=500`;
+            if (category) url += `&category=${category}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            
+            const data = await api(url);
+            const tbody = document.getElementById('structuredBody');
+            
+            if (!data || !data.deals) {
+                tbody.innerHTML = '<tr><td colspan="14">No data</td></tr>';
+                return;
+            }
+            
+            let deals = data.deals;
+            
+            // Get ratings for all deals
+            for (const deal of deals) {
+                if (!allRatings[deal.id]) {
+                    const rating = await api(`/ratings/deals/${deal.id}/rating`);
+                    allRatings[deal.id] = rating;
+                }
+            }
+            
+            // Filter by quality
+            if (quality) {
+                deals = deals.filter(d => allRatings[d.id]?.quality_score === quality);
+            }
+            
+            if (deals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="14">No deals found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = deals.map(d => {
+                const r = allRatings[d.id] || {};
+                const badgeClass = `badge-${r.quality_score || 'other'}`;
+                const catClass = `badge-${d.category || 'other'}`;
+                
+                return `<tr>
+                    <td>${d.id}</td>
+                    <td><strong>${d.merchant_name || 'N/A'}</strong></td>
+                    <td>${d.offer_title || 'N/A'}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${d.description || 'N/A'}</td>
+                    <td><strong style="color:#27ae60">${d.discount_value || 'N/A'}</strong></td>
+                    <td>${d.discount_type || 'N/A'}</td>
+                    <td><span class="badge ${catClass}">${d.category || 'other'}</span></td>
+                    <td>${d.valid_until || 'N/A'}</td>
+                    <td style="max-width:150px;overflow:hidden">${d.applicable_cards || 'N/A'}</td>
+                    <td><strong>${r.llm_score || '-'}/10</strong></td>
+                    <td><span class="badge ${badgeClass}">${r.quality_score || 'N/A'}</span></td>
+                    <td style="max-width:200px;overflow:hidden">${r.reason || '-'}</td>
+                    <td style="max-width:150px;overflow:hidden"><a href="${d.source_url}" target="_blank">Link</a></td>
+                    <td>${d.created_at ? d.created_at.split('T')[0] : 'N/A'}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        async function loadRawDeals() {
+            const data = await api('/raw-deals/?limit=500');
+            const tbody = document.getElementById('rawBody');
+            
+            if (!data || !data.deals) {
+                tbody.innerHTML = '<tr><td colspan="10">No data</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.deals.map(d => {
+                const statusClass = `badge-${d.status === 'processed' ? 'good' : d.status}`;
+                return `<tr>
+                    <td>${d.id}</td>
+                    <td>${d.source_name || 'N/A'}</td>
+                    <td>${d.raw_title || 'N/A'}</td>
+                    <td>${d.raw_merchant || 'N/A'}</td>
+                    <td>${d.raw_discount || 'N/A'}</td>
+                    <td>${d.raw_validity || 'N/A'}</td>
+                    <td style="max-width:200px;overflow:hidden">${d.raw_description || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${d.status}</span></td>
+                    <td style="max-width:100px;overflow:hidden"><a href="${d.scraped_url}" target="_blank">Link</a></td>
+                    <td>${d.scraped_at ? d.scraped_at.split('T')[0] : 'N/A'}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        async function exportData() {
+            const data = await api('/deals/export/');
+            if (data) {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `deals-export-${Date.now()}.json`;
+                a.click();
+            }
+        }
+        
+        // Init
+        if (token) {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            loadStats();
+            loadData();
+        }
+    </script>
 </body>
 </html>
