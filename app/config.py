@@ -33,6 +33,59 @@ DISCOUNT_TYPES = [
 
 QUALITY_SCORES = ["good", "mediocre", "bad"]
 
+POPULAR_BRANDS = [
+    'mcdonald', 'kfc', 'burger king', 'starbucks', 'pizza hut', 'domino',
+    'subway', 'dunkin', 'krispy kreme', 'baskin robbins', 'hardees', 
+    'caribou', 'tim hortons', 'popeyes', 'taco bell', 'wendy',
+    'applebees', 'chilis', 'tgi friday', 'nandos', 'al baik',
+    'shakeshack', 'five guys', 'panda express', 'costa coffee',
+    'ihop', 'dennys', 'fuddruckers', 'johnny rockets',
+    'zara', 'h&m', 'uniqlo', 'nike', 'adidas', 'mango',
+    'ikea', 'homecenter', 'extra', 'jarir', 'saco', 'lulu',
+    'panda', 'carrefour', 'noon', 'amazon', 'extra stores',
+    'american eagle', 'gap', 'levi', 'max', 'centrepoint',
+    'sephora', 'mac', 'bath body', 'victoria secret',
+    'odeon', 'vox', 'reel', 'muvi', 'cinema',
+    'fitness time', 'gold gym', 'gym', 'fitness'
+]
+
+def score_deal(merchant, discount, category):
+    import re
+    score = 5
+    reasons = []
+    
+    pct = 0
+    if discount:
+        match = re.search(r'(\d+)', str(discount))
+        if match:
+            pct = int(match.group(1))
+            if pct >= 30:
+                score += 4
+                reasons.append(f"High discount ({pct}%)")
+            elif pct >= 20:
+                score += 3
+                reasons.append(f"Good discount ({pct}%)")
+            elif pct >= 10:
+                score += 2
+                reasons.append(f"Decent discount ({pct}%)")
+            elif pct >= 5:
+                score += 1
+    
+    merchant_lower = merchant.lower() if merchant else ""
+    for brand in POPULAR_BRANDS:
+        if brand in merchant_lower:
+            score += 3
+            reasons.append(f"Popular brand")
+            break
+    
+    if pct == 0:
+        score -= 2
+    
+    score = min(10, max(1, score))
+    quality = 'good' if score >= 7 else ('mediocre' if score >= 5 else 'bad')
+    
+    return score, quality, "; ".join(reasons) if reasons else "Standard deal"
+
 DEAL_STATUSES = ["new", "processing", "processed", "duplicate", "error"]
 
 BATCH_STATUSES = ["created", "processing", "completed"]
